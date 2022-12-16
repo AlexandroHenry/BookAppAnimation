@@ -9,23 +9,24 @@ import SwiftUI
 
 // MARK: Animatable Projection Transform
 struct CustomProjection: GeometryEffect {
-    var b: CGFloat
-    var c: CGFloat
+    var value: CGFloat
     
-    var animatableData: AnimatablePair<CGFloat, CGFloat> {
+    var animatableData: CGFloat {
         
         get {
-            return AnimatableData(b,c)
+            return value
         }
         
         set {
-            b = newValue.first
-            c = newValue.second
+            value = newValue
         }
     }
     
     func effectValue(size: CGSize) -> ProjectionTransform {
-        return .init(.init(a: 1, b: b, c: c, d: 1, tx: 0, ty: 0))
+        
+        var transform = CATransform3DIdentity
+        transform.m11 = (value == 0 ? 0.0001 : value)
+        return .init(transform)
     }
 }
 

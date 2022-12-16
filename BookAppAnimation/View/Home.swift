@@ -112,6 +112,12 @@ struct Home: View {
     func BookView(book: Book) -> some View {
         GeometryReader {
             let size = $0.size
+            // MARK: Animation Calculation's
+            let rect = $0.frame(in: .global)
+            let minX = (rect.minX - 50) < 0 ? (rect.minX - 50) : -(rect.minX - 50)
+            let progress = (minX) / rect.width
+            // MARK: Your Custom Rotation Angle
+            let rotation = progress * 45
             
             ZStack {
                 
@@ -126,6 +132,9 @@ struct Home: View {
                     Color.white
                 }
                 .frame(width: size.width / 1.2, height: size.height / 1.5)
+                // MARK: Shadows
+                .shadow(color: .black.opacity(0.12), radius: 5, x: 15, y: 8)
+                .shadow(color: .black.opacity(0.1), radius: 6, x: -10, y: -8)
 
                 
                 Image(book.imageName)
@@ -133,7 +142,18 @@ struct Home: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: size.width / 1.2, height: size.height / 1.5)
                     .clipped()
+                    .shadow(color: .black.opacity(0.1), radius: 6, x: 10, y: 8)
+                    // MARK: Adding Book Opening Animation
+                    .rotation3DEffect(.init(degrees: rotation), axis: (x: 0, y: 1, z: 0), anchor: .leading, perspective: 1)
+                    // MARK: Adjusting Projection
+                    // BCZ Progress Goes Beyond -1
+                    .modifier(CustomProjection(value: 1 + (-progress < 1 ? progress : -1.0)))
+
             }
+            // MARK: Adjusting Empty View Until the Progress goes below 1.0
+            // MARK: Here 25 is the Rotation Value
+            // So Make Sure You Update here When the Rotation value is Updated
+            .offset(x: indexOf(book: book) > 0 ? -(progress * 45) : 0)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.horizontal, 50)
